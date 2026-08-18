@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>naoya25 — Portfolio</title>
+<meta name="description" content="naoya25 のポートフォリオ。プロフィールと作品は GitHub から自動取得。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top" id="nav-brand">naoya25</a>
+    <div class="nav-links">
+      <a href="#featured">Products</a>
+      <a href="#skills">Skills</a>
+      <a href="#career">Career</a>
+      <a href="#repos">Repositories</a>
+      <a href="#" id="nav-github" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="avatar-wrap stagger-1">
+    <img id="avatar" class="avatar skeleton" alt="" width="128" height="128">
+  </div>
+  <h1 id="name" class="hero-name stagger-2">&nbsp;</h1>
+  <p id="bio" class="hero-bio stagger-3">&nbsp;</p>
+  <ul class="hero-stats stagger-4" id="stats" aria-label="GitHub 統計"></ul>
+  <div class="hero-actions stagger-5">
+    <a class="btn-primary" id="hero-github" href="#" rel="noopener">GitHub で見る</a>
+    <a class="btn-link" id="hero-qiita" href="#" rel="noopener">Qiita <span class="chev">›</span></a>
+    <a class="btn-link" href="#featured">Products <span class="chev">›</span></a>
+  </div>
+</header>
+
+<section class="section" id="featured">
+  <div class="section-head reveal">
+    <h2>Products</h2>
+    <p class="section-lede">日常の小さな不便を、自分の手で潰すためのプロダクトたち。</p>
+  </div>
+  <div class="featured-grid" id="featured-grid"></div>
+</section>
+
+<section class="band" aria-label="リポジトリ数">
+  <p class="band-num"><span id="band-count" data-countup>0</span></p>
+  <p class="band-caption">repositories and counting.</p>
+</section>
+
+<section class="section" id="skills">
+  <div class="section-head reveal">
+    <h2>Skills</h2>
+    <p class="section-lede">言語の内訳は公開リポジトリから自動集計。</p>
+  </div>
+  <div class="skills-wrap">
+    <ul class="lang-list" id="lang-list"></ul>
+    <ul class="tool-list" id="tool-list"></ul>
+  </div>
+</section>
+
+<section class="section" id="career">
+  <div class="section-head reveal">
+    <h2>Career</h2>
+  </div>
+  <ol class="career-list" id="career-list"></ol>
+</section>
+
+<section class="section section-dark" id="repos">
+  <div class="section-head reveal">
+    <h2>Repositories</h2>
+    <p class="section-lede">このページは GitHub API から自動更新。リポジトリを押すと詳細へ。</p>
+  </div>
+  <div class="repo-grid" id="repo-grid"></div>
+</section>
+
+<footer class="footer">
+  <p id="footer-copy">© 2026 naoya25</p>
+  <p class="footer-sub">
+    <a href="#" id="footer-qiita" rel="noopener">Qiita</a> ·
+    <a href="#" id="footer-source" rel="noopener">source</a> ·
+    Built with GitHub Pages + GitHub API
+  </p>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
