@@ -33,9 +33,10 @@
   const ogImage = (repoName) =>
     `https://opengraph.githubassets.com/portfolio/${cfg.username}/${repoName}`;
 
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const fmtDate = (iso) => {
     const d = new Date(iso);
-    return `${d.getFullYear()}年${d.getMonth() + 1}月更新`;
+    return `Updated ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
   };
 
   const setStaticLinks = () => {
@@ -145,13 +146,13 @@
       body.append(el("h3", null, f.title || f.repo));
       body.append(el("p", null, repo?.description || f.desc || ""));
       const links = el("div", "links");
-      const gh = el("a", null, "リポジトリを見る ›");
+      const gh = el("a", null, "View repository ›");
       gh.href = repo?.html_url || `https://github.com/${cfg.username}/${f.repo}`;
       gh.rel = "noopener";
       links.append(gh);
       const demoUrl = f.demo || repo?.homepage || pagesUrl(repo);
       if (demoUrl) {
-        const demo = el("a", null, "デモを見る ›");
+        const demo = el("a", null, "Live demo ›");
         demo.href = demoUrl;
         demo.rel = "noopener";
         links.append(demo);
@@ -243,24 +244,63 @@
     renderCareer();
   };
 
+  // GitHub API は未認証だと 60回/時(IP 単位)なので localStorage にキャッシュする。
+  // 10分以内のキャッシュはそのまま使い、取得失敗時は古いキャッシュでも表示を続ける
+  const CACHE_KEY = `portfolio-cache:${cfg.username}`;
+  const CACHE_TTL_MS = 10 * 60 * 1000;
+
+  const readCache = () => {
+    try {
+      return JSON.parse(localStorage.getItem(CACHE_KEY));
+    } catch {
+      return null;
+    }
+  };
+
+  const writeCache = (user, repos) => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), user, repos }));
+    } catch {
+      /* private mode 等で書けなくても表示には影響しない */
+    }
+  };
+
+  const fetchData = async () => {
+    const [userRes, repoRes] = await Promise.all([
+      fetch(`${API}/users/${cfg.username}`),
+      fetch(`${API}/users/${cfg.username}/repos?per_page=100&sort=pushed`),
+    ]);
+    if (!userRes.ok || !repoRes.ok) throw new Error(`GitHub API error (${userRes.status}/${repoRes.status})`);
+    return { user: await userRes.json(), repos: await repoRes.json() };
+  };
+
+  const render = ({ user, repos }) => {
+    renderProfile(user);
+    renderFeatured(new Map(repos.map((r) => [r.name.toLowerCase(), r])));
+    renderSkills(repos);
+    renderCareer();
+    renderRepos(repos);
+  };
+
   const init = async () => {
     setStaticLinks();
+    const cached = readCache();
+    if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+      render(cached);
+      return;
+    }
     try {
-      const [userRes, repoRes] = await Promise.all([
-        fetch(`${API}/users/${cfg.username}`),
-        fetch(`${API}/users/${cfg.username}/repos?per_page=100&sort=pushed`),
-      ]);
-      if (!userRes.ok || !repoRes.ok) throw new Error("GitHub API error");
-      const user = await userRes.json();
-      const repos = await repoRes.json();
-      renderProfile(user);
-      renderFeatured(new Map(repos.map((r) => [r.name.toLowerCase(), r])));
-      renderSkills(repos);
-      renderCareer();
-      renderRepos(repos);
+      const data = await fetchData();
+      writeCache(data.user, data.repos);
+      render(data);
     } catch (e) {
-      console.warn("GitHub API 取得に失敗。フォールバック表示:", e);
-      showFallback();
+      if (cached) {
+        console.warn("GitHub API 取得に失敗。キャッシュで表示継続:", e);
+        render(cached);
+      } else {
+        console.warn("GitHub API 取得に失敗。フォールバック表示:", e);
+        showFallback();
+      }
     }
   };
 
